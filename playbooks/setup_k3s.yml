@@ -1,0 +1,30 @@
+- name: Setup k3s Master
+  gather_facts: true
+  hosts: master
+  tasks:
+    - name: Install k3s from website
+      shell: curl https://raw.githubusercontent.com/rancher/k3s/master/install.sh | sudo sh
+    - name: Make sure systemd service started
+      shell: systemctl status k3s
+    - name: Output the join token!
+      shell: cat /var/lib/rancher/k3s/server/node-token
+      register: master_node_token
+    - debug: msg={{ master_node_token.stdout }}
+    - debug: msg={{ ansible_all_ipv4_addresses }}
+    - set_fact:
+        man_ip: "{{ item }}"
+      with_items: "{{ ansible_all_ipv4_addresses }}"
+      when: "item.startswith('192.168.1')"
+    - debug: msg={{ man_ip }}
+- name: Setup k3s Workers
+  gather_facts: false
+  hosts: workers
+  tasks:
+    - debug: msg={{ hostvars['k3s-master']['master_node_token']['stdout'] }}
+    - name: Install k3s from website
+      shell: curl -sfL https://raw.githubusercontent.com/rancher/k3s/master/install.sh | sh -
+      environment:
+        K3S_URL: "https://192.168.1.6:6443"
+        K3S_TOKEN: "{{ hostvars['k3s-master']['master_node_token']['stdout'] }}"
+
+

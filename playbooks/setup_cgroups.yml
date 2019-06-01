@@ -1,0 +1,9 @@
+- name: Setup cgroups
+  gather_facts: false
+  hosts: all
+  tasks:
+    - name: Add cgroups to cmdline.txt
+      script: add_cgroup_cmdline.sh
+    - name: Reboot
+      shell: sudo reboot now
+      

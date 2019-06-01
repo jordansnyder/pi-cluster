@@ -1,0 +1,7 @@
+- name: Cleanup k3s installation
+  hosts: all
+  tasks:
+    - name: Run k3s uninstall script
+      shell: /usr/local/bin/k3s-uninstall.sh
+    - name: Remove k3s directory
+      shell: rm -rf /var/lib/rancher
